@@ -7,6 +7,19 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
+-- DROP EXISTING TABLES (safe re-run)
+-- ============================================
+DROP TABLE IF EXISTS public.plays CASCADE;
+DROP TABLE IF EXISTS public.likes CASCADE;
+DROP TABLE IF EXISTS public.songs CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.update_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS public.increment_play_count(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.deduct_credits(UUID, INTEGER) CASCADE;
+
+-- ============================================
 -- PROFILES TABLE
 -- ============================================
 CREATE TABLE public.profiles (

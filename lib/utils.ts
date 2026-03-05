@@ -42,10 +42,10 @@ export function getGradientFromId(id: string): [string, string] {
 }
 
 export const INSPIRATION_TAGS = [
-  'lo-fi chill', 'epic orchestral', 'dark trap', 'indie folk',
-  'synthwave', 'bollywood', 'jazz fusion', 'noise rock', 'psy trance',
-  'euphoric hardstyle', 'acoustic', 'hip hop', 'R&B', 'pop', 'classical',
-  'ambient', 'metal', 'reggaeton', 'k-pop', 'ghazal',
+  'Hmong folk', 'Bollywood', 'lo-fi chill', 'R&B soul', 'acoustic ballad',
+  'pop', 'hip hop', 'synthwave', 'jazz', 'classical',
+  'country', 'indie folk', 'dark trap', 'ambient', 'electronic',
+  'sad ballad', 'upbeat', 'romantic', 'traditional', 'modern',
 ]
 
 export const MODEL_VERSIONS = [

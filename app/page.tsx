@@ -27,7 +27,7 @@ export default async function HomePage() {
           <div className="w-8 h-8 rounded-lg bg-brand-gradient flex items-center justify-center">
             <Music2 size={16} className="text-white" />
           </div>
-          <span className="font-display font-800 text-lg tracking-wider">MELODAI</span>
+          <span className="font-display font-800 text-lg tracking-wider">HMONGSUAV</span>
         </div>
         <nav className="flex items-center gap-6">
           <Link href="/explore" className="text-sm text-zinc-400 hover:text-white transition-colors">Explore</Link>
@@ -66,7 +66,7 @@ export default async function HomePage() {
 
         <p className="text-lg text-zinc-400 max-w-xl leading-relaxed mb-10">
           Turn your ideas into full songs in seconds. Type a description, pick a style,
-          and let MelodAI compose original music just for you.
+          and let HmongSuav compose original music just for you.
         </p>
 
         <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default async function HomePage() {
       <section className="px-8 pb-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-display font-700 text-2xl text-center mb-8 text-zinc-300">
-            Songs made with MelodAI
+            Songs made with HmongSuav
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {DEMO_SONGS.map(song => (
@@ -114,7 +114,7 @@ export default async function HomePage() {
       <section className="px-8 pb-24 border-t border-surface-border pt-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-display font-700 text-3xl text-center mb-14">
-            Why <span className="gradient-text">MelodAI</span>?
+            Why <span className="gradient-text">HmongSuav</span>?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {FEATURES.map(({ icon: Icon, title, desc }) => (

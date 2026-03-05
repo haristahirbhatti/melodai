@@ -15,8 +15,8 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'MelodAI — AI Music Generator',
-  description: 'Create original music with AI. Generate songs from text descriptions.',
+  title: 'HmongSuav — AI Music Generator',
+  description: 'Create original Hmong music with AI. Generate songs from text descriptions.',
   icons: { icon: '/favicon.svg' },
 }
 

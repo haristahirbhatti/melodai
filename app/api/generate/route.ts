@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'PRODUCER_AI_API_KEY not set' }, { status: 503 })
     }
 
+    // Get app URL for callback
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ||
+      `${request.nextUrl.protocol}//${request.nextUrl.host}`
+
     const songTitle = title || 'My Song'
 
     const { data: song, error: songError } = await supabase
@@ -30,7 +34,7 @@ export async function POST(request: NextRequest) {
         prompt: prompt || '',
         lyrics: lyrics || null,
         tags,
-        model_version: 'chirp-v4',   // always v4
+        model_version: 'chirp-v4',
         status: 'pending',
         is_public: false,
       })
@@ -47,12 +51,12 @@ export async function POST(request: NextRequest) {
         prompt: prompt || '',
         title: songTitle,
         lyrics: lyrics || '',
-        tags: tags.join(', '),      // "Hmong folk, sad ballad, acoustic"
+        tags: tags.join(', '),
         instrumental,
-        model: 'chirp-v4',
-      }, apiKey)
+        model: 'V4_5',
+      }, apiKey, appUrl)
 
-      console.log('TTAPI jobId:', jobId)
+      console.log('KieAI jobId:', jobId)
 
       const { data: deducted } = await supabase.rpc('deduct_credits', { user_id: user.id, amount: 5 })
       if (!deducted) {
@@ -65,12 +69,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         song: { ...song, status: 'processing', producer_task_id: jobId },
         jobId,
-        message: lyrics
-          ? `🎵 Generating with your lyrics in ${tags.join(', ') || 'auto'} style...`
-          : `🎵 Generating ${tags.join(', ') || ''} song...`,
+        message: lyrics ? '🎵 Generating with your lyrics...' : '🎵 Generating your song...',
       })
     } catch (err: any) {
-      console.error('TTAPI call failed:', err.message)
+      console.error('KieAI call failed:', err.message)
       await supabase.from('songs').delete().eq('id', song.id)
       return NextResponse.json({ error: 'Generation failed: ' + err.message }, { status: 503 })
     }

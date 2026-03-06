@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.ttapi.io'
+const BASE_URL = 'https://api.kie.ai'
 
 export interface ProducerGenerateParams {
   prompt: string
@@ -9,82 +9,95 @@ export interface ProducerGenerateParams {
   lyrics?: string
 }
 
-export async function generateMusic(params: ProducerGenerateParams, apiKey: string): Promise<{ jobId: string }> {
+export async function generateMusic(params: ProducerGenerateParams, apiKey: string, appUrl: string): Promise<{ jobId: string }> {
   let body: any
 
+  const callBackUrl = `${appUrl}/api/callback/kie`
+
   if (params.lyrics && params.lyrics.trim()) {
-    // ── CUSTOM MODE ──
-    // User ne lyrics diye → TTAPI custom=true → exact lyrics sing karega
-    // tags = style (genre, mood, voice) — directly Suno style field mein jaata hai
     body = {
-      mv: 'chirp-v4',
-      custom: true,
-      instrumental: params.instrumental || false,
+      prompt: params.lyrics,
       title: params.title || 'My Song',
-      tags: params.tags || '',   // ← "Hmong vocals, sad, acoustic" — Suno ka style field
-      prompt: params.lyrics,     // ← exact lyrics
+      style: params.tags || '',
+      customMode: true,
+      instrumental: params.instrumental || false,
+      model: 'V4_5',
+      callBackUrl,
     }
   } else {
-    // ── SIMPLE MODE ──
-    // Bina lyrics — TTAPI custom=false → AI apni lyrics banata hai
-    // Yahan tags ko gpt_description_prompt mein strongly embed karo
-    const tagStr = params.tags || ''
-    const userDesc = params.prompt || ''
-
-    // Format: "jazz, sad, male vocals song. [user description]"
-    // Suno is format ko best follow karta hai
-    const description = tagStr
-      ? `${tagStr} song${userDesc ? `. ${userDesc}` : ''}`
-      : userDesc
+    const description = params.tags
+      ? `${params.tags} song. ${params.prompt || ''}`
+      : params.prompt || ''
 
     body = {
-      mv: 'chirp-v4',
-      custom: false,
+      prompt: description,
+      customMode: false,
       instrumental: params.instrumental || false,
-      gpt_description_prompt: description,
+      model: 'V4_5',
+      callBackUrl,
     }
   }
 
-  console.log('── TTAPI REQUEST ──')
-  console.log('Mode:', params.lyrics ? 'CUSTOM (user lyrics)' : 'SIMPLE (AI lyrics)')
-  console.log('Instrumental:', params.instrumental)
-  console.log('Tags/Style:', params.tags)
-  console.log('Body:', JSON.stringify(body).slice(0, 400))
+  console.log('KieAI Request:', JSON.stringify(body).slice(0, 400))
 
-  const res = await fetch(`${BASE_URL}/suno/v1/music`, {
+  const res = await fetch(`${BASE_URL}/api/v1/generate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'TT-API-KEY': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
   })
 
   const text = await res.text()
-  console.log('TTAPI Status:', res.status)
-  console.log('TTAPI Response:', text.slice(0, 300))
+  console.log('KieAI Status:', res.status)
+  console.log('KieAI Response:', text.slice(0, 300))
 
-  if (!res.ok) throw new Error(`TTAPI error ${res.status}: ${text}`)
+  if (!res.ok) throw new Error(`KieAI error ${res.status}: ${text}`)
 
   const data = JSON.parse(text)
-  const jobId = data?.data?.jobId || data.jobId || data.task_id || data.id
-  if (!jobId) throw new Error(`No jobId in response: ${text}`)
+  const jobId = data?.data?.taskId || data.taskId
+  if (!jobId) throw new Error(`No taskId in response: ${text}`)
 
   return { jobId }
 }
 
 export async function getTaskStatus(jobId: string, apiKey: string) {
-  const res = await fetch(`${BASE_URL}/suno/v1/fetch`, {
-    method: 'POST',
+  const res = await fetch(`${BASE_URL}/api/v1/generate/record-info?taskId=${jobId}`, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      'TT-API-KEY': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ jobId }),
   })
 
   const text = await res.text()
-  console.log('TTAPI Fetch:', res.status, text.slice(0, 300))
-  if (!res.ok) throw new Error(`TTAPI fetch error: ${text}`)
-  return JSON.parse(text)
+  console.log('KieAI Poll:', res.status, text.slice(0, 300))
+  if (!res.ok) throw new Error(`KieAI poll error: ${text}`)
+
+  const data = JSON.parse(text)
+  const taskData = data?.data
+
+  if (taskData?.status === 'SUCCESS') {
+    const songs = taskData?.response?.sunoData || []
+    return {
+      status: 'SUCCESS',
+      data: {
+        musics: songs.map((s: any) => ({
+          musicId: s.id,
+          title: s.title || 'My Song',
+          tags: s.tags || '',
+          audioUrl: s.audioUrl,
+          imageUrl: s.imageUrl,
+          duration: s.duration,
+          lyrics: s.prompt || null,
+        }))
+      }
+    }
+  }
+
+  if (taskData?.status === 'FAILED' || taskData?.errorCode) {
+    return { status: 'FAILED', error: taskData?.errorMessage || 'Generation failed' }
+  }
+
+  return { status: 'PROCESSING' }
 }

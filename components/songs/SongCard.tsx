@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePlayerStore } from '@/lib/store'
 import { formatDuration, formatRelativeTime, getGradientFromId } from '@/lib/utils'
 import { ThumbsUp, ThumbsDown, Share2, MoreHorizontal, Loader2, XCircle, Trash2, X } from 'lucide-react'
@@ -17,6 +17,11 @@ export function SongCard({ song, showUpgrade, onDelete }: SongCardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [relativeTime, setRelativeTime] = useState('')
+
+  useEffect(() => {
+    setRelativeTime(formatRelativeTime(song.created_at))
+  }, [song.created_at])
 
   const handlePlay = () => {
     if (song.status !== 'completed' || !song.audio_url) return
@@ -28,7 +33,7 @@ export function SongCard({ song, showUpgrade, onDelete }: SongCardProps) {
     e.stopPropagation()
     setLiked(!liked)
     setLikeCount(c => liked ? c - 1 : c + 1)
-    try { await fetch(`/api/songs/like/${song.id}`, { method: 'POST' }) } catch {}
+    try { await fetch(`/api/songs/like/${song.id}`, { method: 'POST' }) } catch { }
   }
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -36,7 +41,7 @@ export function SongCard({ song, showUpgrade, onDelete }: SongCardProps) {
     try {
       if (navigator.share) await navigator.share({ title: song.title, url: window.location.origin + '/explore' })
       else { await navigator.clipboard.writeText(window.location.origin + '/explore'); alert('Link copied!') }
-    } catch {}
+    } catch { }
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -46,7 +51,7 @@ export function SongCard({ song, showUpgrade, onDelete }: SongCardProps) {
     try {
       await fetch(`/api/songs/delete/${song.id}`, { method: 'DELETE' })
       onDelete?.(song.id)
-    } catch {}
+    } catch { }
     setDeleting(false)
     setConfirmDelete(false)
   }
@@ -135,7 +140,7 @@ export function SongCard({ song, showUpgrade, onDelete }: SongCardProps) {
             <button onClick={handleShare} className="p-1.5 rounded-md text-zinc-600 hover:text-zinc-300 transition-colors">
               <Share2 size={12} />
             </button>
-            <span className="text-[10px] text-zinc-700 ml-1 hidden sm:block">{formatRelativeTime(song.created_at)}</span>
+            <span className="text-[10px] text-zinc-700 ml-1 hidden sm:block">{relativeTime}</span>
           </div>
         </div>
 

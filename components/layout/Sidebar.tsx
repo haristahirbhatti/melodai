@@ -146,9 +146,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between px-4 py-5 border-b border-surface-border">
           <Link href="/" className="flex items-center gap-2.5 min-w-0" onClick={() => setSidebarOpen(false)}>
-            <div className="w-8 h-8 rounded-lg bg-brand-gradient flex items-center justify-center flex-shrink-0">
-              <Music2 size={16} className="text-white" />
-            </div>
+            <img src="/logo.jpeg" alt="HmongSuav" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
             {sidebarOpen && <span className="font-display font-800 text-lg tracking-wider text-white">HMONGSUAV</span>}
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="text-zinc-600 hover:text-zinc-400 lg:hidden">

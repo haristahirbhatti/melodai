@@ -13,32 +13,43 @@ export async function generateMusic(params: ProducerGenerateParams, apiKey: stri
   let body: any
 
   if (params.lyrics && params.lyrics.trim()) {
-    // CUSTOM MODE — user ne lyrics diye hain
-    // TTAPI custom=true mode mein exact lyrics use karta hai (just like Suno)
+    // ── CUSTOM MODE ──
+    // User ne lyrics diye → TTAPI custom=true → exact lyrics sing karega
+    // tags = style (genre, mood, voice) — directly Suno style field mein jaata hai
     body = {
-      mv: params.model || 'chirp-v3-5',
+      mv: 'chirp-v4',
       custom: true,
       instrumental: params.instrumental || false,
       title: params.title || 'My Song',
-      tags: params.tags || '',   // genre/style tags
-      prompt: params.lyrics,     // custom=true mein prompt = lyrics
+      tags: params.tags || '',   // ← "Hmong vocals, sad, acoustic" — Suno ka style field
+      prompt: params.lyrics,     // ← exact lyrics
     }
   } else {
-    // SIMPLE MODE — sirf description se generate karo
-    const description = params.tags
-      ? `${params.tags}, ${params.prompt}`
-      : params.prompt
+    // ── SIMPLE MODE ──
+    // Bina lyrics — TTAPI custom=false → AI apni lyrics banata hai
+    // Yahan tags ko gpt_description_prompt mein strongly embed karo
+    const tagStr = params.tags || ''
+    const userDesc = params.prompt || ''
+
+    // Format: "jazz, sad, male vocals song. [user description]"
+    // Suno is format ko best follow karta hai
+    const description = tagStr
+      ? `${tagStr} song${userDesc ? `. ${userDesc}` : ''}`
+      : userDesc
 
     body = {
-      mv: params.model || 'chirp-v3-5',
+      mv: 'chirp-v4',
       custom: false,
       instrumental: params.instrumental || false,
       gpt_description_prompt: description,
     }
   }
 
-  console.log('TTAPI Request mode:', params.lyrics ? 'CUSTOM (with lyrics)' : 'SIMPLE')
-  console.log('TTAPI Request body:', JSON.stringify(body).slice(0, 300))
+  console.log('── TTAPI REQUEST ──')
+  console.log('Mode:', params.lyrics ? 'CUSTOM (user lyrics)' : 'SIMPLE (AI lyrics)')
+  console.log('Instrumental:', params.instrumental)
+  console.log('Tags/Style:', params.tags)
+  console.log('Body:', JSON.stringify(body).slice(0, 400))
 
   const res = await fetch(`${BASE_URL}/suno/v1/music`, {
     method: 'POST',
@@ -50,7 +61,7 @@ export async function generateMusic(params: ProducerGenerateParams, apiKey: stri
   })
 
   const text = await res.text()
-  console.log('TTAPI Response status:', res.status)
+  console.log('TTAPI Status:', res.status)
   console.log('TTAPI Response:', text.slice(0, 300))
 
   if (!res.ok) throw new Error(`TTAPI error ${res.status}: ${text}`)

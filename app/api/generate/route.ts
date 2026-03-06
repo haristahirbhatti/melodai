@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { prompt, title, lyrics, tags = [], instrumental = false, model_version = 'chirp-v3-5' } = body
+    const { prompt, title, lyrics, tags = [], instrumental = false } = body
 
-    if (!prompt?.trim() && !lyrics?.trim() && !title?.trim()) {
-      return NextResponse.json({ error: 'Please add a title, lyrics, or description' }, { status: 400 })
+    if (!prompt?.trim() && !lyrics?.trim() && !title?.trim() && tags.length === 0) {
+      return NextResponse.json({ error: 'Please add a title, lyrics, tags or description' }, { status: 400 })
     }
 
     const apiKey = process.env.PRODUCER_AI_API_KEY
@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
 
     const songTitle = title || 'My Song'
 
-    // Create pending song in DB
     const { data: song, error: songError } = await supabase
       .from('songs')
       .insert({
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
         prompt: prompt || '',
         lyrics: lyrics || null,
         tags,
-        model_version,
+        model_version: 'chirp-v4',   // always v4
         status: 'pending',
         is_public: false,
       })
@@ -47,15 +46,14 @@ export async function POST(request: NextRequest) {
       const { jobId } = await generateMusic({
         prompt: prompt || '',
         title: songTitle,
-        lyrics: lyrics || '',          // ← lyrics TTAPI ko directly jaate hain
-        tags: tags.join(', '),         // ← style/genre tags
+        lyrics: lyrics || '',
+        tags: tags.join(', '),      // "Hmong folk, sad ballad, acoustic"
         instrumental,
-        model: model_version,
+        model: 'chirp-v4',
       }, apiKey)
 
       console.log('TTAPI jobId:', jobId)
 
-      // Deduct credits only after successful API call
       const { data: deducted } = await supabase.rpc('deduct_credits', { user_id: user.id, amount: 5 })
       if (!deducted) {
         await supabase.from('songs').update({ status: 'failed' }).eq('id', song.id)
@@ -67,7 +65,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         song: { ...song, status: 'processing', producer_task_id: jobId },
         jobId,
-        message: lyrics ? 'Generating song with your lyrics! 🎵' : 'Song generation started!',
+        message: lyrics
+          ? `🎵 Generating with your lyrics in ${tags.join(', ') || 'auto'} style...`
+          : `🎵 Generating ${tags.join(', ') || ''} song...`,
       })
     } catch (err: any) {
       console.error('TTAPI call failed:', err.message)
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Generation failed: ' + err.message }, { status: 503 })
     }
   } catch (error: any) {
-    console.error('Generate route error:', error)
+    console.error('Generate error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

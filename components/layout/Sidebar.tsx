@@ -13,7 +13,7 @@ function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const notifications = [
     { id: 1, tag: 'New Feature!', tagColor: 'bg-pink-500', title: 'Lyrics Mode 🎵', desc: 'You can now paste your own lyrics and generate a song with your exact words!', time: 'Just now' },
     { id: 2, tag: 'Tip', tagColor: 'bg-brand-orange', title: 'Use Inspiration Tags', desc: 'Select style tags like "Hmong folk" or "sad ballad" to guide the AI generation.', time: '2h ago' },
-    { id: 3, tag: 'Welcome', tagColor: 'bg-emerald-500', title: 'Welcome to HmongSuav! 🎉', desc: 'Start creating your first AI-powered song. You have 30 free credits to get started.', time: '1d ago' },
+    { id: 3, tag: 'Welcome', tagColor: 'bg-emerald-500', title: 'Welcome to HmongSuab! 🎉', desc: 'Start creating your first AI-powered song. You have 30 free credits to get started.', time: '1d ago' },
   ]
 
   return (
@@ -146,8 +146,8 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between px-4 py-5 border-b border-surface-border">
           <Link href="/" className="flex items-center gap-2.5 min-w-0" onClick={() => setSidebarOpen(false)}>
-            <img src="/logo.jpeg" alt="HmongSuav" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
-            {sidebarOpen && <span className="font-display font-800 text-lg tracking-wider text-white">HMONGSUAV</span>}
+            <img src="/logo.jpeg" alt="HmongSuab" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+            {sidebarOpen && <span className="font-display font-800 text-lg tracking-wider text-white">HMONGSUAB</span>}
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="text-zinc-600 hover:text-zinc-400 lg:hidden">
             <X size={18} />

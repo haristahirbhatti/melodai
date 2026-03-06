@@ -15,9 +15,9 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'HmongSuav — AI Music Generator',
+  title: 'HmongSuab — AI Music Generator',
   description: 'Create original Hmong music with AI. Generate songs from text descriptions.',
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.svg', shortcut: '/favicon.svg' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

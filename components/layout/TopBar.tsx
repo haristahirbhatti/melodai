@@ -11,8 +11,8 @@ export function TopBar() {
         <Menu size={22} />
       </button>
       <Link href="/" className="flex items-center gap-2">
-        <img src="/logo.jpeg" alt="HmongSuav" className="w-8 h-8 rounded-lg object-cover" />
-        <span className="font-display font-800 text-base tracking-wider">HMONGSUAV</span>
+        <img src="/logo.jpeg" alt="HmongSuab" className="w-8 h-8 rounded-lg object-cover" />
+        <span className="font-display font-800 text-base tracking-wider">HMONGSUAB</span>
       </Link>
       <div className="w-8 h-8 rounded-full bg-brand-gradient-h flex items-center justify-center text-xs font-bold overflow-hidden">
         {profile?.avatar_url

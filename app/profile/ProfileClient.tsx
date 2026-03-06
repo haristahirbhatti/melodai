@@ -52,7 +52,7 @@ export function ProfileClient({ profile, songs, likedSongs }: Props) {
   }
 
   const handleShare = () => {
-    navigator.share?.({ title: 'My HmongSuav Profile', url: window.location.href }) ||
+    navigator.share?.({ title: 'My HmongSuab Profile', url: window.location.href }) ||
       navigator.clipboard.writeText(window.location.href)
   }
 
